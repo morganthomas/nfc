@@ -54,9 +54,17 @@ let
 
       # Haskell specific overlay (for you to extend)
       haskell-overlay = pkgs: hself: hsuper: {
-         "nfc" = hself.callCabal2nix "nfc" (gitignore ../.) {
-           nfc = pkgs.libnfc;
-         };
+         "nfc" = with pkgs.haskell.lib; overrideCabal
+           (appendConfigureFlags
+             (hself.callCabal2nix "nfc" (gitignore ../.) {
+               nfc = pkgs.libnfc;
+             })
+             [ "--extra-include-dirs=${pkgs.libnfc.outPath}/include"
+               "--extra-lib-dirs=${pkgs.libnfc.outPath}/lib"
+             ]
+           )
+           (drv: {
+           });
       };
 
 
